@@ -64,7 +64,33 @@ def part1():
 
 
 def part2():
-    pass
+    numbers = generate_numbers()
+
+    marked_numbers_of = defaultdict(list)
+    board_counts_x_of = defaultdict(lambda: defaultdict(int))
+    board_counts_y_of = defaultdict(lambda: defaultdict(int))
+
+    def update(b: int, x: int, y: int):
+        board_counts_x_of[b][x] += 1
+        board_counts_y_of[b][y] += 1
+        marked_numbers_of[b].append(n)
+        return board_counts_x_of[b][x] == N or board_counts_y_of[b][y] == N
+
+    has_already_won = set()
+    won_boards_count = 0
+
+    for n in input:
+        targets = numbers[n]
+        for b in targets:
+            x, y = targets[b]
+            if update(b, x, y) and b not in has_already_won:
+                has_already_won.add(b)
+                won_boards_count += 1
+
+                if won_boards_count == len(boards):
+                    return int(n) * sum_of_unmarked_numbers(
+                        boards[b], marked_numbers_of[b]
+                    )
 
 
 if __name__ == "__main__":
