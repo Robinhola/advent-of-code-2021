@@ -1,0 +1,34 @@
+#/bin/bash
+echo "making a new day $1"
+
+FOLDER_PREFIX="adventofcode2021/days"
+
+CONTENT=".template.py"
+
+file="day$1.py"
+
+if [[ $1 -le 5 ]]; then
+    folder_suffix="01to05"
+elif [[ $1 -le 10 ]]; then
+    folder_suffix="06to10"
+elif [[ $1 -le 15 ]]; then
+    folder_suffix="11to15"
+elif [[ $1 -le 20 ]]; then
+    folder_suffix="16to20"
+elif [[ $1 -le 25 ]]; then
+    folder_suffix="21to25"
+else
+    echo "error folder not found"
+    exit 1
+fi
+
+if [[ $1 -le 9 ]]; then
+    file="day0$1.py"
+fi
+
+folder="$FOLDER_PREFIX$folder_suffix"
+destination="$folder/$file"
+
+touch "$destination"
+
+cat $CONTENT > "$destination" && git add $destination && code $destination
