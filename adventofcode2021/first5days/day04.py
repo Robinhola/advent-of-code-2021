@@ -2,7 +2,8 @@ import re
 from pprint import pprint
 from collections import defaultdict
 
-from input_data import day04 as raw_data
+from adventofcode2021.input_data import day04 as raw_data
+
 
 N = 5
 

@@ -2,7 +2,7 @@ from collections import defaultdict
 from pprint import pprint
 import re
 
-from input_data import day05 as raw_data
+from adventofcode2021.input_data import day05 as raw_data
 
 
 def decomp(line):

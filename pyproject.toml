@@ -3,6 +3,10 @@ name = "advent-of-code-2021"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
+packages = [
+    { include = "adventofcode2021" },
+    { include = "adventofcode2021/**/*.py" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
