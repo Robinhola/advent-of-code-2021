@@ -1,0 +1,13 @@
+#/bin/bash
+
+file="day$1.py"
+source=$(find . -name "$file")
+
+if [[ -f $source ]]
+then
+    echo "Solving $file"
+    source $(find . -name activate)
+    python $source
+else
+    echo "$file not found!"
+fi
