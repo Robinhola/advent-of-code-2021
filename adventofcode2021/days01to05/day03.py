@@ -1,4 +1,4 @@
-from input_data import day03 as raw_data
+from adventofcode2021.input_data import day03 as raw_data
 
 from collections import defaultdict
 
