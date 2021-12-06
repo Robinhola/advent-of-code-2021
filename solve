@@ -1,13 +1,28 @@
 #/bin/bash
 
+re='^[0-9]+$'
+if ! [[ $1 =~ $re ]] ; then
+   echo "error: $1 is not a positive number!" >&2; exit 1
+fi
+
 file="day$1.py"
+
+if [[ $1 -le 9 ]]; then
+    file="day0$1.py"
+elif [[ $1 -le 25 ]]; then
+    true
+else
+    echo "$1 is not a valid input!"
+    exit 1
+fi
+
 source=$(find . -name "$file")
 
 if [[ -f $source ]]
 then
-    echo "Solving $file"
+    echo "Solving day $1"
     source $(find . -name activate)
     python $source
 else
-    echo "$file not found!"
+    echo "Day $1 has not been solved yet!"
 fi
