@@ -28,16 +28,13 @@ def generate_numbers():
 
 
 def all_numbers_of(board: list):
-    numbers = set()
-    for l in board:
-        numbers.update(l)
-    return numbers
+    return {number for line in board for number in line}
 
 
 def sum_of_unmarked_numbers(board: list, marked_numbers: list):
     A = all_numbers_of(board)
     B = set(marked_numbers)
-    return sum((int(v) for v in A.difference(B)))
+    return sum(int(v) for v in A.difference(B))
 
 
 def part1():
@@ -59,8 +56,8 @@ def part1():
     for n in input:
         targets = numbers[n]
         for b in targets:
-            x, y = targets[b]
-            if update(b, x, y):
+            if update(b, *targets[b]):
+                # we stop as soon as a board has won
                 return int(n) * sum_of_unmarked_numbers(boards[b], marked_numbers_of[b])
 
 
@@ -83,12 +80,12 @@ def part2():
     for n in input:
         targets = numbers[n]
         for b in targets:
-            x, y = targets[b]
-            if update(b, x, y) and b not in has_already_won:
+            if update(b, *targets[b]) and b not in has_already_won:
                 has_already_won.add(b)
                 won_boards_count += 1
 
                 if won_boards_count == len(boards):
+                    # we only stop when all boards have won
                     return int(n) * sum_of_unmarked_numbers(
                         boards[b], marked_numbers_of[b]
                     )
