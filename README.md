@@ -2,6 +2,12 @@
 
 https://adventofcode.com/2021
 
+## Install the project in a virtual env
+
+```sh
+./install
+```
+
 ## Generate new file
 
 ```sh
