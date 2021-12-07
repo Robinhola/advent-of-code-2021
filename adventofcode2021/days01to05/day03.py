@@ -25,18 +25,25 @@ def convert(bin):
 def part1():
     bits = get_bits(data)
 
-    strongs = []
-    weaks = []
+    strongs, weaks = [], []
     for i in range(N):
-        a, b = reduce(bits[i])
-        strongs.append(a)
-        weaks.append(b)
+        strong, weak = reduce(bits[i])
+        strongs.append(strong)
+        weaks.append(weak)
 
     return convert(strongs) * convert(weaks)
 
 
-def filter_by(bit_number, value, iterable):
-    return list(filter(lambda x: x[bit_number] == str(value), iterable))
+def filter_by(bit_index, value, iterable):
+    return list(filter(lambda x: x[bit_index] == str(value), iterable))
+
+
+def from_str_to_list(l: str):
+    return [int(i) for i in l]
+
+
+def multiply(a: list, b: list):
+    return convert(from_str_to_list(a)) * convert(from_str_to_list(b))
 
 
 def part2():
@@ -44,30 +51,17 @@ def part2():
     filtered_by_least_common = list(data)
 
     for i in range(N):
-        most_common, _ = reduce(get_bits(filtered_by_most_common)[i])
-        _, least_common = reduce(get_bits(filtered_by_least_common)[i])
+        strong, _ = reduce(get_bits(filtered_by_most_common)[i])
+        _, weak = reduce(get_bits(filtered_by_least_common)[i])
 
         if len(filtered_by_most_common) > 1:
-            filtered_by_most_common = filter_by(i, most_common, filtered_by_most_common)
+            filtered_by_most_common = filter_by(i, strong, filtered_by_most_common)
 
         if len(filtered_by_least_common) > 1:
-            filtered_by_least_common = filter_by(
-                i, least_common, filtered_by_least_common
-            )
+            filtered_by_least_common = filter_by(i, weak, filtered_by_least_common)
 
         if len(filtered_by_most_common) == len(filtered_by_least_common) == 1:
-            break
-
-    def from_str_to_list(l):
-        return [int(i) for i in l]
-
-    a = from_str_to_list(filtered_by_most_common[0])
-    b = from_str_to_list(filtered_by_least_common[0])
-
-    a = convert(a)
-    b = convert(b)
-
-    return a * b
+            return multiply(filtered_by_most_common[0], filtered_by_least_common[0])
 
 
 if __name__ == "__main__":
