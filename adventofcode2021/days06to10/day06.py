@@ -1,16 +1,9 @@
-from collections import defaultdict
+from collections import defaultdict, Counter
 from types import new_class
 
 from adventofcode2021.input_data import day06 as raw_data
 
 data = [int(x) for x in raw_data.split(",")]
-
-
-def build_state(ages: list):
-    state = defaultdict(int)
-    for a in ages:
-        state[a] += 1
-    return state
 
 
 def create_new_state(state: dict):
@@ -29,10 +22,10 @@ def sum_numbers_fish(state: dict):
 
 
 def simulate_growth(number_of_iterations: int):
-    state = build_state(data)
+    fish = Counter(data)
     for _ in range(number_of_iterations):
-        state = create_new_state(state)
-    print(sum_numbers_fish(state))
+        fish = create_new_state(fish)
+    print(sum_numbers_fish(fish))
 
 
 if __name__ == "__main__":
