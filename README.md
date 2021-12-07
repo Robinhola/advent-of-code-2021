@@ -14,7 +14,7 @@ https://adventofcode.com/2021
 ./newday $DAY # where day is a number between 1 and 25
 ```
 
-## To solve a day
+## Solve a day
 
 ```sh
 ./solve $DAY # where day is a number between 1 and 25
