@@ -1,16 +1,5 @@
 from adventofcode2021.input_data import day08 as raw_data
 
-# raw_data = """be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
-# edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc
-# fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef | cg cg fdcagb cbg
-# fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega | efabcd cedba gadfec cb
-# aecbfdg fbg gf bafeg dbefa fcge gcbea fcaegb dgceab fcbdga | gecf egdcabf bgf bfgea
-# fgeab ca afcebg bdacfeg cfaedg gcfdb baec bfadeg bafgc acf | gebdcfa ecba ca fadegcb
-# dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf | cefg dcbef fcge gbcadfe
-# bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd | ed bcgafe cdgba cbgef
-# egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg | gbdfcae bgc cg cgb
-# gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce"""
-
 data = raw_data.splitlines()
 
 
@@ -37,80 +26,49 @@ def length_is(i: int):
 
 
 def decode_patterns(patterns: list):
-    # Read patterns
-    """
-    acedgfb: 8 ok
-    cefabd: 9 ok
-    cdfgeb: 6 ok
-    cagedb: 0 ok
-    cdfbe: 5 ok
-    gcdfa: 2
-    fbcad: 3 ok
-    eafb: 4 ok
-    dab: 7 ok
-    ab: 1 ok
-    """
+    def extract_numbers_of_length(i: int):
+        return tuple(filter(length_is(i), patterns))
 
     def unique_numbers():
-        c_f = set(tuple(filter(length_is(2), patterns))[0])
-        a_c_f = set(tuple(filter(length_is(3), patterns))[0])
-        b_c_d_f = set(tuple(filter(length_is(4), patterns))[0])
-        a_b_c_d_e_f_g = set(tuple(filter(length_is(7), patterns))[0])
+        c_f = set(extract_numbers_of_length(2)[0])
+        a_c_f = set(extract_numbers_of_length(3)[0])
+        b_c_d_f = set(extract_numbers_of_length(4)[0])
+        a_b_c_d_e_f_g = set(extract_numbers_of_length(7)[0])
         return c_f, a_c_f, b_c_d_f, a_b_c_d_e_f_g
 
-    def find_6(one):
-        possible_6 = [set(x) for x in tuple(filter(length_is(6), patterns))]
-        for s in possible_6:
+    def find_0_6_9(one, four):
+        possibilities = [set(x) for x in extract_numbers_of_length(6)]
+        for s in possibilities:
             if s.intersection(one) != one:
-                return s
+                six = s
+            elif s.intersection(four) == four:
+                nine = s
+            else:
+                zero = s
+        return zero, six, nine
 
-    def find_9(four, six):
-        possible_9 = [
-            set(x) for x in tuple(filter(length_is(6), patterns)) if set(x) != six
-        ]
-        for s in possible_9:
-            if s.intersection(four) == four:
-                return s
-
-    def find_0(six, nine):
-        possible_0 = [set(x) for x in tuple(filter(length_is(6), patterns))]
-        for s in possible_0:
-            if s != six and s != nine:
-                return s
-
-    def find_3(one):
-        possible_3 = [set(x) for x in tuple(filter(length_is(5), patterns))]
-        for s in possible_3:
+    def find_2_3_5(one, six):
+        possibilities = [set(x) for x in extract_numbers_of_length(5)]
+        for s in possibilities:
             if s.intersection(one) == one:
-                return s
-
-    def find_5(six):
-        possible_5 = [set(x) for x in tuple(filter(length_is(5), patterns))]
-        for s in possible_5:
-            if six.intersection(s) == s:
-                return s
-
-    def find_2(three, five):
-        possible_0 = [set(x) for x in tuple(filter(length_is(5), patterns))]
-        for s in possible_0:
-            if s != three and s != five:
-                return s
+                three = s
+            elif six.intersection(s) == s:
+                five = s
+            else:
+                two = s
+        return two, three, five
 
     one, seven, four, eight = unique_numbers()
-    six = find_6(one)
-    nine = find_9(four, six)
-    zero = find_0(six, nine)
-    three = find_3(one)
-    five = find_5(six)
-    two = find_2(three, five)
+    zero, six, nine = find_0_6_9(one, four)
+    two, three, five = find_2_3_5(one, six)
 
     numbers_as_sets = [zero, one, two, three, four, five, six, seven, eight, nine]
     numbers_as_tuples = [tuple(sorted(x)) for x in numbers_as_sets]
     return {numbers_as_tuples[i]: i for i in range(10)}
 
 
-def decode_output_values(output_values, patterns):
-    return [patterns[tuple(sorted(x))] for x in output_values]
+def decode_output_values(output_values: list, pattern_table: dict):
+    return [pattern_table[tuple(sorted(x))] for x in output_values]
 
 
 def list_to_int(l):
