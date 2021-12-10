@@ -1,19 +1,4 @@
-from collections import defaultdict
-from pprint import pprint
-from pprint import pprint
-
 from adventofcode2021.input_data import day10 as raw_data
-
-# raw_data = """[({(<(())[]>[[{[]{<()<>>
-# [(()[<>])]({[<{<<[]>>(
-# {([(<{}[<>[]}>{[]{[(<()>
-# (((({<>}<{<{<>}{[]{[]{}
-# [[<[([]))<([[{}[[()]]]
-# [{[{({}]{}}([{[{{{}}([]
-# {<[[]]>}<{[{[{[]{()[[[]
-# [<(<(<(<{}))><([]([]()
-# <{([([[(<>()){}]>(<<{{
-# <{([{{}}[<[[[<>{}]]]>[]]"""
 
 data = raw_data.splitlines()
 
@@ -23,12 +8,7 @@ opening_correspondence = {
     "(": ")",
     "<": ">",
 }
-closing_correspondence = {
-    "]": "[",
-    "}": "{",
-    ")": "(",
-    ">": "<",
-}
+
 point = {
     ")": 3,
     "]": 57,
@@ -82,8 +62,8 @@ def part1():
 
 
 def part2():
-    completion = [find_incomplete(line) for line in data]
-    scores = [calculate_score(l) for l in completion if l]
+    completion = (find_incomplete(line) for line in data)
+    scores = tuple(calculate_score(l) for l in completion if l)
     middle_index = int(len(scores) / 2)
     return sorted(scores)[middle_index]
 
