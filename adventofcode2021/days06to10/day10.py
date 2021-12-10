@@ -33,6 +33,7 @@ def find_corruption(line):
             expecting.pop()
         else:
             return c
+    return None
 
 
 def find_incomplete(line):
@@ -56,16 +57,14 @@ def calculate_score(ending_characters: list):
 
 
 def part1():
-    corrupted = (find_corruption(line) for line in data)
-    points = (point[c] for c in corrupted if c in point)
-    return sum(points)
+    corrupted_letters = map(find_corruption, data)
+    return sum(point[c] for c in corrupted_letters if c)
 
 
 def part2():
-    completion = (find_incomplete(line) for line in data)
-    scores = tuple(calculate_score(l) for l in completion if l)
+    scores = sorted(calculate_score(l) for l in map(find_incomplete, data) if l)
     middle_index = int(len(scores) / 2)
-    return sorted(scores)[middle_index]
+    return scores[middle_index]
 
 
 if __name__ == "__main__":
