@@ -1,15 +1,3 @@
-# example
-# raw_data = """5483143223
-# 2745854711
-# 5264556173
-# 6141336146
-# 6357385478
-# 4167524645
-# 2176841721
-# 6882881134
-# 4846848554
-# 5283751526"""
-
 raw_data = """1224346384
 5621128587
 6388426546
@@ -20,14 +8,6 @@ raw_data = """1224346384
 2582877432
 3185643871
 2224876627"""
-
-
-def get(grid, x, y):
-    return grid[y][x]
-
-
-def set_value(grid, x, y, value):
-    grid[y][x] = value
 
 
 def make_grid():
@@ -51,14 +31,16 @@ def neighbours(x, y):
     )
 
 
+def update_and_append_if_flashing(grid, x, y, flashing_cells):
+    grid[y][x] += 1
+    if grid[y][x] >= 10:
+        flashing_cells.append((x, y))
+
+
 def update_neighbours(grid, coord):
     flashing = []
     for neighbour in neighbours(*coord):
-        x, y = neighbour
-        value = get(grid, x, y) + 1
-        set_value(grid, x, y, value)
-        if value >= 10:
-            flashing.append(neighbour)
+        update_and_append_if_flashing(grid, *neighbour, flashing)
     return flashing
 
 
@@ -66,31 +48,22 @@ def trigger_flashing(grid, flashing_cells: list):
     seen = set()
     while flashing_cells:
         coord = flashing_cells.pop()
-
-        if coord in seen:
-            continue
-
-        seen.add(coord)
-
-        flashing_neighbours = update_neighbours(grid, coord)
-        flashing_cells.extend(x for x in flashing_neighbours if x not in seen)
-
+        if coord not in seen:
+            seen.add(coord)
+            flashing_neighbours = update_neighbours(grid, coord)
+            flashing_cells.extend(x for x in flashing_neighbours if x not in seen)
     return seen
 
 
 def simulate_step(grid):
     flashing_cells = []
-
-    for (x, y) in ((x, y) for x in range(10) for y in range(10)):
-        value = get(grid, x, y) + 1
-        set_value(grid, x, y, value)
-        if value == 10:
-            flashing_cells.append((x, y))
+    for coord in ((x, y) for x in range(10) for y in range(10)):
+        update_and_append_if_flashing(grid, *coord, flashing_cells)
 
     flashed = trigger_flashing(grid, flashing_cells)
 
-    for coord in flashed:
-        set_value(grid, *coord, 0)
+    for (x, y) in flashed:
+        grid[y][x] = 0
 
     return len(flashed)
 
