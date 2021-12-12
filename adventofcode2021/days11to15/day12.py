@@ -1,6 +1,6 @@
 from collections import Counter, defaultdict
 from pprint import pprint
-from typing import Sequence
+from typing import Sequence, Tuple
 
 # Input
 raw_data = """hl-WP
@@ -35,15 +35,15 @@ for line in raw_data.splitlines():
     data[end].append(start)
 
 
-def part1():
+def find_all_complete_paths(make_condition_from_path):
     completed_path = []
     paths = [["start"]]
     while paths:
         new_paths = []
         for p in paths:
             cave = p[-1]
-            already_seen = {x for x in p if x.islower()}
-            options = [x for x in data[cave] if x not in already_seen]
+            condition = make_condition_from_path(p)
+            options = [x for x in data[cave] if condition(x)]
             for o in options:
                 new = list(p)
                 new.append(o)
@@ -52,33 +52,39 @@ def part1():
                 else:
                     new_paths.append(new)
         paths = new_paths
-    return len(completed_path)
+    return completed_path
+
+
+def part1():
+    def make_condition_from_path(path: list):
+        already_seen = {x for x in path if x.islower()}
+
+        def condition(cave):
+            return cave not in already_seen
+
+        return condition
+
+    completed_paths = find_all_complete_paths(make_condition_from_path)
+
+    return len(completed_paths)
 
 
 def part2():
-    completed_path = []
-    paths = [["start"]]
-    while paths:
-        new_paths = []
-        for p in paths:
-            cave = p[-1]
-            count = Counter(x for x in p if x.islower())
-            options = data[cave]
-            for o in options:
-                if o == "start":
-                    continue
+    def make_condition_from_path(path: list):
+        counter = Counter(x for x in path if x.islower())
 
-                if o.islower() and 2 in count.values() and count[o] >= 1:
-                    continue
+        def condition(cave):
+            if cave == "start":
+                return False
+            if cave.islower() and 2 in counter.values() and counter[cave] >= 1:
+                return False
+            return True
 
-                new = list(p)
-                new.append(o)
-                if o == "end":
-                    completed_path.append(new)
-                else:
-                    new_paths.append(new)
-        paths = new_paths
-    return len(completed_path)
+        return condition
+
+    completed_paths = find_all_complete_paths(make_condition_from_path)
+
+    return len(completed_paths)
 
 
 if __name__ == "__main__":
