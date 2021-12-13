@@ -39,20 +39,19 @@ def part1():
     return len(dots_after_first_fold)
 
 
-def print_capital_letters(dots_after_folding):
-    paper = [[" "] * (5 * 8 - 1) for _ in range(6)]
-    for (x, y) in dots_after_folding:
-        paper[y][x] = "#"
-
-    for l in paper:
-        print("".join(l))
-
-
 def part2():
     dots_after_folding = set(dots)
     for fold in folding_instructions:
         dots_after_folding = {transform(*fold, *coord) for coord in dots_after_folding}
     return dots_after_folding
+
+
+def print_capital_letters(dots_after_folding):
+    paper = [[" "] * (5 * 8 - 1) for _ in range(6)]
+    for (x, y) in dots_after_folding:
+        paper[y][x] = "#"
+    for l in paper:
+        print("".join(l))
 
 
 if __name__ == "__main__":
