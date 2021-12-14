@@ -1,10 +1,10 @@
-from collections import Counter
+from collections import Counter, defaultdict
 
 from adventofcode2021.input_data import day14 as raw_data
 
 data = raw_data.splitlines()
 polymer_template = data[0]
-pair_insertion_rules = {a: b for (a, b) in (x.split(" -> ") for x in data[2:])}
+rules = {a: b for (a, b) in (x.split(" -> ") for x in data[2:])}
 
 
 def pairs_of(template: str):
@@ -12,39 +12,42 @@ def pairs_of(template: str):
         yield "".join((template[i], template[i + 1]))
 
 
-def apply_step(template: str):
-    new_template = []
-    for pair in pairs_of(template):
-        new_template.append(pair[0])
-        if pair in pair_insertion_rules:
-            new_template.append(pair_insertion_rules[pair])
-    new_template.append(pair[1])
-    return "".join(new_template)
-
-
 def apply_n_steps(n):
-    template = polymer_template
+    polymers = Counter(pairs_of(polymer_template))
     for i in range(n):
-        print("step", i)
-        template = apply_step(template)
-    return template
+        new_polymers = defaultdict(int)
+        for pair, count in polymers.items():
+            for new_pair in [
+                pair[0] + rules[pair],
+                rules[pair] + pair[1],
+            ]:
+                new_polymers[new_pair] += count
+        polymers = new_polymers
+    return polymers
 
 
-def difference_between_most_and_least_common(template):
-    counter = Counter(template)
-    most_common = counter.most_common(1)[0][1]
-    least_common = counter.most_common()[-1][1]
-    return most_common - least_common
+# I needed help for this one: mistake was to not abstract the problem and try to compute
+# a 1_000_000_000_000 long string...
+def difference_between_most_and_least_common(polymers):
+    counts = [
+        max(
+            sum(count for (p1, _), count in polymers.items() if c == p1),
+            sum(count for (_, p2), count in polymers.items() if c == p2),
+        )
+        for c in set("".join(polymers.keys()))
+    ]
+
+    return max(counts) - min(counts)
 
 
 def part1():
-    template = apply_n_steps(10)
-    return difference_between_most_and_least_common(template)
+    polymers = apply_n_steps(10)
+    return difference_between_most_and_least_common(polymers)
 
 
 def part2():
-    template = apply_n_steps(40)
-    return difference_between_most_and_least_common(template)
+    polymers = apply_n_steps(40)
+    return difference_between_most_and_least_common(polymers)
 
 
 if __name__ == "__main__":
