@@ -67,36 +67,7 @@ def sum_until(n):
     return n * (n + 1) / 2
 
 
-def find_best_x():
-    n = 1
-    while sum_until(n) < x1:
-        n += 1
-    return n
-
-
-def find_last_x():
-    n = 1
-    while sum_until(n) <= x2:
-        n += 1
-    return n  # not included
-
-
-def find_first_y(start):
-    x = find_best_x()
-    y = start
-    reached = False
-    while not reached:
-        y += 1
-        velocity = (x, y)
-        reached, probe = validate_probe(velocity)
-    return y
-
-
 def part1():
-    for v in ((7, 2), (6, 3), (9, 0), (17, -4), (6, 9), (20, 88), (20, 89)):
-        reached, probe = validate_probe(v)
-        print(reached, probe.highest_y)
-
     # Manual work
     _, probe = validate_probe((20, 88))
     return probe.highest_y
@@ -114,8 +85,6 @@ def part2():
             if reached:
                 count += 1
     return count
-
-    pass
 
 
 if __name__ == "__main__":
