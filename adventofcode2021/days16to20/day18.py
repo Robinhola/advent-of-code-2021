@@ -5,7 +5,37 @@ from types import new_class
 from typing import Optional, Union
 import math
 
-raw_data = """replace_me"""
+raw_data = """[1,1]
+[2,2]
+[3,3]
+[4,4]"""
+
+raw_data = """[1,1]
+[2,2]
+[3,3]
+[4,4]
+[5,5]"""
+
+# raw_data = """[[[[4,3],4],4],[7,[[8,4],9]]]
+# [1,1]"""
+
+raw_data = """[1,1]
+[2,2]
+[3,3]
+[4,4]
+[5,5]
+[6,6]"""
+
+raw_data = """[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
+[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]
+[[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]]
+[[[[2,4],7],[6,[0,5]]],[[[6,8],[2,8]],[[2,1],[4,5]]]]
+[7,[5,[[3,8],[1,4]]]]
+[[2,[2,2]],[8,[8,1]]]
+[2,9]
+[1,[[[9,3],9],[[9,0],[0,7]]]]
+[[[5,[7,4]],7],1]
+[[[[4,2],2],6],[8,7]]"""
 
 
 @dataclass
@@ -21,20 +51,17 @@ class SnailFishNumber:
         a.increase_depth()
         b.increase_depth()
         sum = cls(a, b, 0)
+        a.parent = sum
+        b.parent = sum
 
         to_explode, to_split = sum.look_for_node(4)
-        print("after addition", end="")
         while to_explode is not None or to_split is not None:
-            print(sum)
             if to_explode:
-                print("after explode", end="")
                 cls.explode_node(to_explode)
             if to_split:
-                print("after split", end="")
                 cls.split_node(to_split)
             to_explode, to_split = sum.look_for_node(4)
 
-        print(sum)
         return sum
 
     @classmethod
@@ -43,17 +70,20 @@ class SnailFishNumber:
             node.find_left().value += node.left.value
         if node.find_right() is not None:
             node.find_right().value += node.right.value
-        if node.parent.left == node:
+
+        if node.parent.left is node:
             node.parent.left = cls(None, None, node.depth, node.parent, 0)
-        elif node.parent.right == node:
+        elif node.parent.right is node:
             node.parent.right = cls(None, None, node.depth, node.parent, 0)
 
     @classmethod
     def split_node(cls, node: "SnailFishNumber"):
         value = node.value
-        node.left = cls(None, None, node.depth + 1, node, math.floor(value / 2.0))
-        node.right = cls(None, None, node.depth + 1, node, math.ceil(value / 2.0))
+        depth = node.depth
+        node.left = cls(None, None, depth + 2, node, math.floor(value / 2.0))
+        node.right = cls(None, None, depth + 2, node, math.ceil(value / 2.0))
         node.value = None
+        node.depth = depth + 1
 
     def look_for_node(self, depth):
         if self.value and self.value > 9:
@@ -104,21 +134,31 @@ class SnailFishNumber:
 
         return new_node
 
+    def right_most(self):
+        if self.value is not None:
+            return self
+        else:
+            return self.right.right_most()
+
+    def left_most(self):
+        if self.value is not None:
+            return self
+        else:
+            return self.left.left_most()
+
     def find_left(self):
         if not self.parent:
             return None
-        if self.parent.left == self:
+        if self.parent.left is self:
             return self.parent.find_left()
-        else:
-            return self.parent.left
+        return self.parent.left.right_most()
 
     def find_right(self):
         if not self.parent:
             return None
-        if self.parent.right == self:
+        if self.parent.right is self:
             return self.parent.find_right()
-        else:
-            return self.parent.right
+        return self.parent.right.left_most()
 
     def __str__(self):
         if self.value is not None:
@@ -131,15 +171,14 @@ class SnailFishNumber:
 
 
 def part1():
-    a = SnailFishNumber.from_input("[1,1]")
-    b = SnailFishNumber.from_input("[2,2]")
-    d = SnailFishNumber.from_input("[3,3]")
-    c = SnailFishNumber.from_input("[[[[[9,8],1],2],3],4]")
-
-    e = SnailFishNumber.from_input("[[[[4,3],4],4],[7,[[8,4],9]]]")
-    f = SnailFishNumber.from_input("[1,1]")
-    # return e
-    return e + f
+    number = None
+    for l in raw_data.splitlines():
+        if number == None:
+            number = SnailFishNumber.from_input(l)
+        else:
+            number = number + SnailFishNumber.from_input(l)
+        print(number)
+    return number
 
 
 def part2():
