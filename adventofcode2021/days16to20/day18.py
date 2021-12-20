@@ -89,7 +89,11 @@ class SnailFishNumber:
         if self.value and self.value > 9:
             return None, self
 
-        if self.value is None and self.depth == depth:
+        if self.value is None and self.depth >= depth:
+            if self.left.value is None:
+                return self.left.look_for_node(depth)
+            if self.right.value is None:
+                return self.right.look_for_node(depth)
             return self, None
 
         if self.left:
@@ -171,6 +175,10 @@ class SnailFishNumber:
 
 
 def part1():
+    a = SnailFishNumber.from_input("[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]")
+    b = SnailFishNumber.from_input("[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]")
+    return a + b
+
     number = None
     for l in raw_data.splitlines():
         if number == None:
