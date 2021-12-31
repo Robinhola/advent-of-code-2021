@@ -1,141 +1,180 @@
 from dataclasses import dataclass
-from types import new_class
-from typing import List
 import math
-import itertools
-
-raw_data = """[1,1]
-[2,2]
-[3,3]
-[4,4]"""
-
-raw_data = """[1,1]
-[2,2]
-[3,3]
-[4,4]
-[5,5]"""
+from collections import defaultdict
+from typing import List, Optional
 
 
 @dataclass
-class SFNumber:
-    index: int
+class SnailNumberMember:
     value: int
-    position: bool  # False for Left, True for Right
+    index: int
     depth: int
+    is_left: bool
 
 
-def parse_line(line: str):
-    numbers = []
+def read_number(line: str):
+    full_number = []
+    index = 0
     depth = 0
-    is_right = []
+    is_left = True
     for character in line:
-        if character == "[":
+        if character.isnumeric():
+            full_number.append(
+                SnailNumberMember(
+                    value=int(character), index=index, depth=depth, is_left=is_left
+                )
+            )
+            index += 1
+        elif character == "[":
+            is_left = True
             depth += 1
-            is_right.append(False)
         elif character == "]":
             depth -= 1
-            is_right.pop()
-
-        elif character.isnumeric():
-            index = len(numbers)
-            numbers.append(SFNumber(index, int(character), is_right[-1], depth))
         elif character == ",":
-            is_right[-1] = True
-    return numbers
+            is_left = False
+
+    return full_number
 
 
-def is_left(x: SFNumber):
-    return x.position is False
+def explode(target: SnailNumberMember, full_number: list):
+    left = full_number[target.index]
+    right = full_number[target.index + 1]
+    is_left = None
+
+    if left.index > 0:
+        previous = full_number[left.index - 1]
+        previous.value += left.value
+        is_left = previous.depth != 4 or not previous.is_left
+    else:
+        is_left = True
+
+    if right.index + 1 < len(full_number):
+        full_number[right.index + 1].value += right.value
+
+    for i in range(right.index + 1, len(full_number)):
+        full_number[i].index -= 1
+
+    left.value = 0
+    left.depth -= 1
+    left.is_left = is_left
+
+    return full_number[: right.index] + full_number[right.index + 1 :]
 
 
-def is_right(x: SFNumber):
-    return x.position
+def split(target: SnailNumberMember, full_number: list):
+    left = SnailNumberMember(
+        value=math.floor(target.value / 2.0),
+        index=target.index,
+        depth=target.depth + 1,
+        is_left=True,
+    )
 
+    right = SnailNumberMember(
+        value=math.ceil(target.value / 2.0),
+        index=target.index + 1,
+        depth=target.depth + 1,
+        is_left=False,
+    )
 
-def needs_work(numbers: List[SFNumber]):
-    for x in numbers:
-        if x.index >= len(numbers) - 1:
-            break
+    for i in range(target.index + 1, len(full_number)):
+        full_number[i].index += 1
 
-        y = numbers[x.index + 1]
-
-        if is_left(x) and is_right(y) and x.depth > 4:
-            return x
-        elif x.value > 9:
-            return x
-        elif y.value > 9:
-            return y
-
-    return None
-
-
-def explode(x: SFNumber, numbers: List[SFNumber]):
-    left = x
-    right = numbers[x.index + 1]
-
-    left_numbers = numbers[: left.index]
-    right_numbers = numbers[right.index + 2 :]
-
-    if left_numbers:
-        left_numbers[-1].value += left.value
-
-    if right_numbers:
-        right_numbers[0].value += right.value
-
-    for n in right_numbers:
-        n.index -= 1
-
-    should_be_right = False
-    if left_numbers:
-        should_be_right = left_numbers[-1].position
-
-    new_number = SFNumber(x.index, 0, should_be_right, x.depth - 1)
-
-    return left_numbers + [new_number] + right_numbers
-
-
-def split(x: SFNumber, numbers: List[SFNumber]):
-    new_left = SFNumber(x.index, math.floor(x.value / 2.0), False, x.depth + 1)
-    new_right = SFNumber(x.index, math.ceil(x.value / 2.0), True, x.depth + 1)
-
-    left_numbers = numbers[: x.index]
-    right_numbers = numbers[x.index + 1 :]
-
-    for n in right_numbers:
-        n.index += 1
-
-    return left_numbers + [new_left, new_right] + right_numbers
-
-
-def addition(a: List[SFNumber], b: List[SFNumber]):
-    for x in itertools.chain(a, b):
-        x.depth += 1
-
-    result = a + b
-
-    x = needs_work(result)
-    while x:
-        if x.depth >= 4:
-            result = explode(x, result)
-        elif x.value > 9:
-            result = split(x, result)
-        x = needs_work(result)
+    result = (
+        full_number[: target.index] + [left, right] + full_number[target.index + 1 :]
+    )
 
     return result
 
 
-def part1():
-    number = None
-    for l in raw_data.splitlines():
-        if number == None:
-            number = parse_line(l)
+def clean_up(full_number: list):
+    done = False
+    while not done:
+        done = True
+        for x in (a for a in full_number if a.depth > 4):
+            full_number = explode(x, full_number)
+            done = False
+            break
+
+        if not done:
+            continue
+
+        for x in (a for a in full_number if a.value > 9):
+            full_number = split(x, full_number)
+            done = False
+            break
+
+    return full_number
+
+
+def addition(left: list, right: list):
+    for x in left:
+        x.depth += 1
+    for x in right:
+        x.depth += 1
+        x.index += len(left)
+    return clean_up(left + right)
+
+
+def compute_from_track(track, value):
+    tmp = value
+    for coeff in (3 if a else 2 for a in track):
+        tmp *= coeff
+    return tmp
+
+
+def magnitude(full_number: List[SnailNumberMember]):
+    track = []
+    depth = 0
+    result = 0
+
+    for x in full_number:
+        if x.depth > depth:
+            offset = x.depth - depth
+            track.extend([True] * offset)
+        elif x.depth < depth:
+            track = track[: -(depth - x.depth)]
+
+        track[-1] = x.is_left
+        result += compute_from_track(track, x.value)
+        if x.is_left:
+            depth = x.depth
         else:
-            number = addition(number, parse_line(l))
-    return number
+            depth = x.depth - 1
+            track.pop()
+            for i in range(len(track)):
+                if track[-1 - i]:
+                    track[-1 - i] = False
+                    break
+                else:
+                    track[-1 - i] = True
+
+    return result
+
+
+from adventofcode2021.input_data import day18 as raw_data
+
+
+def part1():
+    a = None
+    for l in raw_data.splitlines():
+        if a == None:
+            a = read_number(l)
+        else:
+            a = addition(a, read_number(l))
+    return magnitude(a)
 
 
 def part2():
-    pass
+    numbers = raw_data.splitlines()
+    results = []
+
+    for i, n in enumerate(numbers):
+        for c in numbers[i + 1 :]:
+            first = magnitude(addition(read_number(n), read_number(c)))
+            second = magnitude(addition(read_number(c), read_number(n)))
+            results.append(max(first, second))
+
+    return max(results)
 
 
 if __name__ == "__main__":
